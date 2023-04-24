@@ -1,8 +1,8 @@
 # Sequential Perception Dataset
-The dataset is for the vehicle-infrastructure cooperative 3D tracking task. Please refer https://github.com/AIR-THU/DAIR-V2X-Seq/dataset/v2x-seq-spd for the latest introduction.
+The dataset is designed for the vehicle-infrastructure cooperative 3D tracking task. For the recent information and introduction, please visit https://github.com/AIR-THU/DAIR-V2X-Seq/tree/main/dataset/v2x-seq-spd.
 
 ## Dataset Structure
-In this part, we provide the detailed structure for the sequential perception dataset.
+In this section, we present the comprehensive structure of the sequential perception dataset.
 ```
 V2X-Seq-SPD/V2X-Seq-SPD-Example         # (An example sequence of) sequential percpetion dataset 
     └──  infrastructure-side            # Infrastructure-side data
@@ -13,14 +13,14 @@ V2X-Seq-SPD/V2X-Seq-SPD-Example         # (An example sequence of) sequential pe
         ├── calib                     
             ├── camera_intrinsic        # Camera intrinsic parameter       
                 ├── {id}.json         
-            ├── virtuallidar_to_world   # Extrinsic parameter from virtual lidar to world 
+            ├── virtuallidar_to_world   # Extrinsic parameter from virtual LiDAR coordinate system to world coordinate system
                 ├── {id}.json          
-            ├── virtuallidar_to_camera  # Extrinsic parameter from virtual lidar to camera
+            ├── virtuallidar_to_camera  # Extrinsic parameter from virtual LiDAR coordinate system to camera coordinate system
                 ├── {id}.json          
         ├── label			
-            ├── camera                  # Labeled data in infrastructure virtual LiDAR coordinate system fitting objects in image with image camptured timestamp
+            ├── camera                  # Labeles in infrastructure virtual LiDAR coordinate system fitting objects in image with image camptured timestamp
                 ├── {id}.json
-            ├── virtuallidar            # Labeled data in infrastructure virtual LiDAR coordinate system fitting objects in point cloud with point cloud captured timestamp
+            ├── virtuallidar            # Labeles in infrastructure virtual LiDAR coordinate system fitting objects in point cloud with point cloud captured timestamp
                 ├── {id}.json
         └── data_info.json              # More detailed information for each infrastructure-side frame
     └── vehicle-side                    # Vehicle-side data
@@ -31,20 +31,20 @@ V2X-Seq-SPD/V2X-Seq-SPD-Example         # (An example sequence of) sequential pe
         ├── calib                     
             ├── camera_intrinsic        # Camera intrinsic parameter   
                 ├── {id}.json
-            ├── lidar_to_camera         # extrinsic parameter from lidar to camera
+            ├── lidar_to_camera         # extrinsic parameter from LiDAR coordinate system to camera coordinate system 
                 ├── {id}.json
-            ├── lidar_to_novatel        # extrinsic parameter from lidar to NovAtel
+            ├── lidar_to_novatel        # extrinsic parameter from LiDAR coordinate system to NovAtel coordinate system
                 ├── {id}.json
-            ├── novatel_to_world        # location in the world coordinate
+            ├── novatel_to_world        # location in the world coordinate system
                 ├── {id}.json
         ├── label			
-            ├── camera                  # Labeled data in vehicle LiDAR coordinate system fitting objects in image with image camptured timestamp
+            ├── camera                  # Labeles in vehicle LiDAR coordinate system fitting objects in image with image camptured timestamp
                 ├── {id}.json
-            ├── lidar                   # Labeled data in vehicle LiDAR coordinate system fitting objects in point cloud with point cloud captured timestamp
+            ├── lidar                   # Labeles in vehicle LiDAR coordinate system fitting objects in point cloud with point cloud captured timestamp
                 ├── {id}.json
         └── data_info.json              # More detailed information for each vehicle-side frame
     └── cooperative                     # Coopetative-view files
-        ├── label                       # Vehicle-infrastructure cooperative (VIC) annotation files. Labeled data in vehicle LiDAR coordinate system with the vehicle point cloud timestamp
+        ├── label                       # Vehicle-infrastructure cooperative (VIC) annotation files. Labeles in vehicle LiDAR coordinate system with the vehicle point cloud timestamp
             ├── {id}.json                
         └── data_info.json              # More detailed information for vehicle-infrastructure cooperative frame pair
     └── maps                            # HD Maps for each intersection
@@ -53,7 +53,7 @@ V2X-Seq-SPD/V2X-Seq-SPD-Example         # (An example sequence of) sequential pe
 ---
 
 ## Introduction of data-info.json
-In this part, we introduce the content in the three files: infrastructure-side/data_info.json, vehicle-side/data_info.json, and cooperative/data_info.json.
+In this section, we explain the contents in three files: infrastructure-side/data_info.json, vehicle-side/data_info.json, and cooperative/data_info.json.
 
 ### infrastructure-side/data_info.json
 
@@ -117,10 +117,10 @@ In this part, we introduce the content in the three files: infrastructure-side/d
 ---
 
 ## Introduction of Annotation Files
-In this part, we provide the detailed information to explain the annotation for each frame, including infrastructure-side frame, vehicle-side frame, and cooperative frame.
+In this section, we provide a detailed explanation of the annotations for each frame type, encompassing infrastructure-side frames, vehicle-side frames, and cooperative frames.
 
-### Tracking Annotation for Infrastructure and Vehicle frames
-Here we explain the contents in tracking annotation for infrastructure-side frame and vehicle-side frame.
+### Tracking Annotation for Infrastructure and Vehicle Frames
+In this part, we clarify the contents of tracking annotations for both infrastructure-side and vehicle-side frames.
 
 ```json
 {
@@ -154,13 +154,13 @@ Here we explain the contents in tracking annotation for infrastructure-side fram
 
 - 10 object classes, including: Car, Truck, Van, Bus, Pedestrian, Cyclist, Tricyclist, Motorcyclist, Barrowlist, and TrafficCone.
 
-- No tracking annotation for TrafficCone class
+- No tracking annotation for TrafficCone class.
 
 
 ---
 ## Cooperative Annotation File
 
-Here we explain the contents in tracking annotation file for cooperative frame.
+Here we explain the contents within the tracking annotation file for cooperative frames.
 
 ```json
 {

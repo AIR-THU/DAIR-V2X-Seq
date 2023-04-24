@@ -1,15 +1,15 @@
 # Trajectory Forecasting Dataset
-The dataset is used for the vehicle-infrastructure cooperative trajectory forecasting tasks. Please refer https://github.com/AIR-THU/DAIR-V2X-Seq/dataset/v2x-seq-tfd for the latest introduction.
+This dataset is designed for vehicle-infrastructure cooperative trajectory forecasting tasks. For the recent information and introduction, please visit https://github.com/AIR-THU/DAIR-V2X-Seq/tree/main/dataset/v2x-seq-tfd.
 
 ## Dataset Structure
 ```
 V2X-Seq-TFD/V2X-Seq-TFD-Example             # (An example sequence of) trajectory forecasting dataset 
-    └── single-infrastructure               # Trajectory forecasting dataset only with infrastructure view
+    └── single-infrastructure               # Trajectory forecasting dataset with infrastructure-only view
         └── trajectories			      
             ├── {scene_id}.csv                    
         └── traffic-light                        
             ├── {scene_id}.csv                
-    └── single-vehicle                      # Trajectory forecasting dataset only with vehicle view
+    └── single-vehicle                      # Trajectory forecasting dataset with vehicle-only view
         └── trajectories			      
             ├── {scene_id}.csv  	                
     └── cooperative-vehicle-infrastructure  # Trajectory forecasting dataset with vehicle-infrastructure cooperative view
