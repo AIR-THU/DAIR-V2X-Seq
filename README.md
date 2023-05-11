@@ -3,29 +3,55 @@
 # V2X-Seq: A Large-Scale Sequential Dataset for  Vehicle-Infrastructure Cooperative Perception and Forecasting, CVPR2023
 </div> 
 
+<h3 align="center">
+    <a href="https://thudair.baai.ac.cn/index">Project Page</a> |
+    <a href="#dataset">Dataset Download</a> |
+    <a href="https://arxiv.org/abs/2305.05938">arXiv</a> |
+    <a href="https://github.com/AIR-THU/DAIR-V2X-Seq/">V2X-Seq</a> 
+</h3>
+
   ![](./resources/tracking-demo.gif "")
   ![](./resources/forecasting-demo.gif "")
 
+## Table of Contents:
+1. [Introduction](#introduction)
+2. [News](#news)
+3. [Dataset Download](#dataset)
+4. [Getting Started](#start)
+5. [Benchmark](#benchmark)
+6. [TODO List](#todo)
+7. [Citation](#citation)
+8. [Contaction](#contaction)
 
-## Introduction 
+## Introduction <a name="introduction"></a>
 V2X-Seq is the first large-scale, real-world, and sequential V2X dataset, which includes data frames, trajectories, vector maps, and traffic lights captured from natural scenery. V2X-Seq comprises two parts: the sequential perception dataset, which includes more than 15,000 frames captured from 95 scenarios, and the trajectory forecasting dataset, which contains about 80,000 infrastructure-view scenarios, 80,000 vehicle-view scenarios, and 50,000 cooperative-view scenarios captured from 28 intersections' areas, covering 672 hours of data.
 
-## News
-* [2023.03] 🔥 Our new dataset "V2X-Seq: A Large-Scale Sequential Dataset for Vehicle-Infrastructure Cooperative Perception and Forecasting" has been accepted by CVPR2023. Congratulations! We will release the dataset sooner. 
+## News <a name="news"></a>
+* [2023.05] 🔥 V2X-Seq dataset is availale [here](https://thudair.baai.ac.cn/index). It can be unlimitedly downloaded within mainland China. 
+* [2023.03] Our new dataset "V2X-Seq: A Large-Scale Sequential Dataset for Vehicle-Infrastructure Cooperative Perception and Forecasting" has been accepted by CVPR2023. Congratulations! We will release the dataset sooner. 
 
-## Dataset 
+## Dataset Download <a name="dataset"></a>
 
 V2X-Seq is one of our [DAIR-V2X dataset series](https://thudair.baai.ac.cn/index).  Download links are as follows:
 
-- Sequential Perception Dataset (SPD): [Coming soon].
-- Trajectory Forecasting Dataset (TFD): [Coming soon].
+- Sequential Perception Dataset (SPD): [dataset download link](https://thudair.baai.ac.cn/coop-forecast).
+- Trajectory Forecasting Dataset (TFD): [dataset download link](https://thudair.baai.ac.cn/cooplocus).
 - Example Dataset: [Coming soon].
 
+## Getting Started <a name="start"></a>
+Please refer to [getting_started.md](docs/get_started.md) for Installation, Evaluation, Benchmark and Training etc for VIC3D.
 
-## Benchmarks
+## Benchmark <a name="benchmark"></a>
 Coming soon.
 
-## Citation
+## TODO List <a name="todo"></a>
+- [x] Dataset release
+- [ ] Dataset API
+- [ ] Evaluation code
+- [ ] Training&Evaluation code for VID3D Tracking Benchmark
+- [ ] Training&Evaluation code for VID Forecasting
+
+## Citation <a name="citation"></a>
 Please consider citing our paper if the project helps your research with the following BibTex:
 ```bibtex
 @inproceedings{v2x-seq,
@@ -45,7 +71,11 @@ Please consider citing our paper if the project helps your research with the fol
 }
 ```
 
-## Related Resources
+## Contaction <a name="contaction"></a>
+
+If any questions and suggenstations, please email to dair@air.tsinghua.edu.cn. 
+
+## Related Resources <a name="related"></a>
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
