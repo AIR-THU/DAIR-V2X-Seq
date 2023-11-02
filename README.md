@@ -28,7 +28,7 @@ V2X-Seq is the first large-scale, real-world, and sequential V2X dataset, which 
 
 ## News <a name="news"></a>
 * [2023.09] We have released the code for V2X-Seq, including Sequential Perception Dataset (SPD) and Trajectory Forecasting Dataset (TFD).
-* [2023.05] V2X-Seq dataset is availale [here](https://thudair.baai.ac.cn/index). It can be unlimitedly downloaded within mainland China. Example dataset can be downloaded directly. 
+* [2023.05] V2X-Seq dataset is available [here](https://thudair.baai.ac.cn/index). It can be unlimitedly downloaded within mainland China. Example dataset can be downloaded directly. 
 * [2023.03] Our new dataset "V2X-Seq: A Large-Scale Sequential Dataset for Vehicle-Infrastructure Cooperative Perception and Forecasting" has been accepted by CVPR2023. Congratulations! We will release the dataset sooner. 
 
 ## Dataset Download <a name="dataset"></a>
