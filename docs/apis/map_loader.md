@@ -11,5 +11,5 @@ You can load and merge 28 HD maps into one map as followings.
 2. Load and Merge HD Maps
     ```shell
     mkdir ${DATA_ROOT}/map_files
-    python tools/data_converter/merge_maps.py 
+    python tools/data_converter/maps_merge.py 
     ```
