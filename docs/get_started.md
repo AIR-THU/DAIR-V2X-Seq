@@ -46,6 +46,9 @@ Here's how to evaluate PP-VIC with HiVT for solving the Online-VIC Forecasting t
     # Download TFD-Example into ./dataset/v2x-seq-tfd/V2X-Seq-TFD-Example
     bash tools/dataset_example_download.sh
 
+    # export DATA_ROOT, change the DATA_ROOT to TFD-Example data root
+    export DATA_ROOT=${PWD}'/dataset/v2x-seq-tfd/V2X-Seq-TFD-Example'
+
     # Merge Multiple Maps into One Map
     python tools/data_converter/maps_merge.py
 

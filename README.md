@@ -37,7 +37,7 @@ V2X-Seq is one of our [DAIR-V2X dataset series](https://thudair.baai.ac.cn/index
 
 - Sequential Perception Dataset (SPD): [dataset download link](https://thudair.baai.ac.cn/coop-forecast).
 - Trajectory Forecasting Dataset (TFD): [dataset download link](https://thudair.baai.ac.cn/cooplocus).
-- Example Dataset: [SPD-Example](https://drive.google.com/file/d/1gjOmGEBMcipvDzu2zOrO9ex_OscUZMYY/view?usp=drive_link), [TFD-Example](https://drive.google.com/file/d/1vV2BZvBWkum-j0r82JOjAajlSWB7kyU2/view?usp=sharing).
+- Example Dataset: [SPD-Example](https://drive.google.com/file/d/1gjOmGEBMcipvDzu2zOrO9ex_OscUZMYY/view?usp=drive_link), [TFD-Example](https://drive.google.com/file/d/1-Ri92z6rkH14vAOFOx5xhfzvFxBptgAA/view?usp=drive_link).
 
 ## Getting Started <a name="start"></a>
 Please refer to [getting_started.md](docs/get_started.md) for usage of V2X-Seq dataset and benchmarks reproduction.

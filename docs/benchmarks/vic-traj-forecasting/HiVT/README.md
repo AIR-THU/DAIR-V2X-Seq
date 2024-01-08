@@ -15,9 +15,12 @@
 ## Data Preparation
 1. Download TFD/TFD-Example into ./dataset/v2x-seq-tfd with ${DATA_ROOT}
    ```shell
-   # export DATA_ROOT = 'DAIR-V2X-Seq/dataset/v2x-seq-tfd/V2X-Seq-TFD-Example'
    # Download TFD-Example into ./dataset/v2x-seq-tfd
    bash tools/dataset_example_download.sh
+
+   # export DATA_ROOT, change the DATA_ROOT to TFD-Example data root
+   export DATA_ROOT=${PWD}'/dataset/v2x-seq-tfd/V2X-Seq-TFD-Example'
+   ```
    ```
 
 2. Merge Multiple Maps into One Map
@@ -31,6 +34,8 @@
    # Preprocess Cooperative-view Trajectories --split train/val
    python tools/trajectory_fusion/fusion_for_prediction.py --data_root ${DATA_ROOT} --split train
    python tools/data_converter/tfd_converter.py --data_root ${DATA_ROOT} --split train
+   python tools/trajectory_fusion/fusion_for_prediction.py --data_root ${DATA_ROOT} --split val
+   python tools/data_converter/tfd_converter.py --data_root ${DATA_ROOT} --split val
    ```
 
 ## Training
