@@ -4,12 +4,12 @@
 
 | Using Inf. Trajectories | Base Model | minADE | minFDE |  MR  | Checkpoint | README |
 | :-------------------------------: | :--------------: | :----: | :----: | :--: | :--: | :--: |
-|                 ✕                 |       TNT        |  8.45  | 17.93  | 0.77 | [checkpoint](../../../projects/TNT_plugin/models/single_veh.pth) | [TNT README](./TNT/README.md)
-|              Online               |       TNT        |  7.38  | 15.27  | 0.72 | [checkpoint](../../../projects/TNT_plugin/models/online.pth) |
-|              Offline              |       TNT        |  4.38  |  9.37  | 0.62 | [checkpoint](../../../projects/TNT_plugin/models/offline.pth) |
-|                 ✕                 |       HiVT       |  1.44  |  2.52  | 0.36 | [checkpoint](../../../projects/HiVT_plugin/checkpoints/single_veh.ckpt) | [HiVT README](./HiVT/README.md)
-|              Online               |       HiVT       |  1.25  |  2.33  | 0.35 | [checkpoint](../../../projects/HiVT_plugin/checkpoints/online.ckpt) |
-|              Offline              |       HiVT       |  1.39  |  2.23  | 0.32 | [checkpoint](../../../projects/HiVT_plugin/checkpoints/offline.ckpt) |
+|                 ✕                 |       TNT        |  8.45  | 17.93  | 0.77 | [checkpoint](https://drive.google.com/file/d/1G235I56Tm7DUvH_DEW_RZ5T2K73hM25U/view?usp=drive_link) | [TNT README](./TNT/README.md)
+|              Online               |       TNT        |  8.00  | 16.65  | 0.75 | [checkpoint](https://drive.google.com/file/d/18BqwsVthu_z2xntc2amlrf5PAtVUAsQM/view?usp=drive_link) |
+|              Offline              |       TNT        |  4.38  |  9.37  | 0.62 | [checkpoint](https://drive.google.com/file/d/1nJSCKulkZ9bwyOmNvqJyxHjgZwx_A3_J/view?usp=drive_link) |
+|                 ✕                 |       HiVT       |  1.44  |  2.52  | 0.36 | [checkpoint](https://drive.google.com/file/d/1FKP9I2JSoNo98xp01pNQ_pN8WBwcrKse/view?usp=drive_link) | [HiVT README](./HiVT/README.md)
+|              Online               |       HiVT       |  1.26  |  2.34  | 0.35 | [checkpoint](https://drive.google.com/file/d/1EWYN1xzDLNo7BdqSZ-YoSXFZDd5WT4Ml/view?usp=drive_link) |
+|              Offline              |       HiVT       |  1.39  |  2.23  | 0.32 | [checkpoint](https://drive.google.com/file/d/1Is9FhhpkbdjngU3kWT46NIsI5PtoJA62/view?usp=drive_link) |
 
 
 ## Citation

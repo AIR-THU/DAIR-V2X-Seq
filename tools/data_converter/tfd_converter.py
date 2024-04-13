@@ -43,7 +43,7 @@ def format(iter):
             'tag'
             ]
     
-    t_min, t_max = min(pre_df.timestamp), max(pre_df.timestamp)
+    t_min, t_max = min(pre_df.timestamp), max(pre_df.timestamp) + 5.0
     t_obs = t_min + 4.9
 
     car_df = pd.read_csv(os.path.join(car_path, iter))
