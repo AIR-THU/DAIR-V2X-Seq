@@ -273,7 +273,8 @@ class PredictionFusion(Fusion):
         frame_id = 0
 
         sec = sec_start
-        while sec <= sec_end:
+        sec_obs = sec_start + 4.9
+        while sec <= sec_obs:
             # make full use of road info
             tracks1 = copy.deepcopy(tracks1_data[np.where(np.logical_and(tracks1_data[:,0] >= sec, tracks1_data[:,0] < sec + self.time_step))[0]])
             tracks2 = copy.deepcopy(tracks2_data[np.where(np.logical_and(tracks2_data[:,0] >= sec, tracks2_data[:,0] < sec + self.time_step))[0]])
