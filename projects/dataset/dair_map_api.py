@@ -29,7 +29,8 @@ MAX_LABEL_DIST_TO_LANE = 20  # meters
 OUT_OF_RANGE_LANE_DIST_THRESHOLD = 5.0  # 5 meters
 ROI_ISOCONTOUR = 5.0
 
-ROOT = os.path.join(os.environ.get('DATA_ROOT'), 'map_files')
+work_dir = "/y/minkycho/DAIR-V2X-Seq"
+ROOT = f"{work_dir}/tutorial/merged_map"
 
 # known City IDs from newest to oldest
 PEKING_ID = 10000
@@ -80,14 +81,14 @@ class DAIRV2XMap(ArgoverseMap):
                                         (k=lane_id, v=lane info)
         """
         city_lane_centerlines_dict = {}
-        '''
-        for city_name, city_id in self.city_name_to_city_id_dict.items():
-            xml_fpath = self.map_files_root / f"pruned_argoverse_{city_name}_{city_id}_vector_map.xml"
-            city_lane_centerlines_dict[city_name] = load_lane_segments_from_xml(xml_fpath)
-        '''
+        # '''
+        # for city_name, city_id in self.city_name_to_city_id_dict.items():
+        #     xml_fpath = self.map_files_root / f"pruned_argoverse_{city_name}_{city_id}_vector_map.xml"
+        #     city_lane_centerlines_dict[city_name] = load_lane_segments_from_xml(xml_fpath)
+        # '''
         for city_name, city_id in self.city_name_to_city_id_dict.items():
 
-            map_dir = 'yizhuang_PEK_vector_map.json'
+            map_dir = 'dair_v2x_seq_vector_map.json'
             lane_segment_dict = {}
 
             with open(os.path.join(self.root, map_dir), encoding='utf-8') as f :
@@ -124,10 +125,10 @@ class DAIRV2XMap(ArgoverseMap):
         city_halluc_tableidx_to_laneid_map = {}
 
         for city_name, city_id in self.city_name_to_city_id_dict.items():
-            json_fpath = self.map_files_root / "yizhuang_PEK_tableidx_to_laneid_map.json"
+            json_fpath = self.map_files_root / "dair_v2x_seq_tableidx_to_laneid_map.json"
             city_halluc_tableidx_to_laneid_map[city_name] = read_json_file(json_fpath)
 
-            npy_fpath = self.map_files_root / "yizhuang_PEK_halluc_bbox_table.npy"
+            npy_fpath = self.map_files_root / "dair_v2x_seq_halluc_bbox_table.npy"
             city_halluc_bbox_table[city_name] = np.load(npy_fpath)
 
         return city_halluc_bbox_table, city_halluc_tableidx_to_laneid_map

@@ -19,7 +19,7 @@ import scipy.interpolate as interp
 
 import sys
 sys.path.append("../..")
-from projects.dataset.dair_map_api import DAIRMap
+from projects.dataset.dair_map_api import DAIRV2XMap
 
 _ZORDER = {
     "TARGET_AGENT": 15, "AV": 10, "COVEH": 10,
@@ -69,7 +69,7 @@ def viz_static(
 
     if lane_centerlines is None:
         # Get API for DAIR Dataset map
-        avm = DAIRMap()
+        avm = DAIRV2XMap()
         seq_lane_props = avm.city_lane_centerlines_dict[city_name]
 
     _, ax = plt.subplots(figsize=(12, 8))
