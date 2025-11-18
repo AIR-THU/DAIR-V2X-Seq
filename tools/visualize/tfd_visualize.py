@@ -17,9 +17,7 @@ import numpy as np
 import pandas as pd
 import scipy.interpolate as interp
 
-import sys
-sys.path.append("../..")
-from projects.dataset.dair_map_api import DAIRMap
+from projects.dataset.dair_map_api import DAIRV2XMap
 
 _ZORDER = {
     "TARGET_AGENT": 15, "AV": 10, "COVEH": 10,
