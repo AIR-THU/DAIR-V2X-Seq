@@ -69,7 +69,7 @@ def viz_static(
 
     if lane_centerlines is None:
         # Get API for DAIR Dataset map
-        avm = DAIRMap()
+        avm = DAIRV2XMap()
         seq_lane_props = avm.city_lane_centerlines_dict[city_name]
 
     _, ax = plt.subplots(figsize=(12, 8))
