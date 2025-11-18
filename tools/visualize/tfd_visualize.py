@@ -60,6 +60,8 @@ def viz_static(
     df: pd.DataFrame,
     lane_centerlines: Optional[List[np.ndarray]] = None,
     show: bool = False,
+    save: bool = False,
+    fig_name: Optional[str] = "figures/static_viz.png",
     smoothen: bool = True,
 ) -> None:
     # Seq data
@@ -189,3 +191,5 @@ def viz_static(
     plt.axis("off")
     if show:
         plt.show()
+    if save:
+        plt.savefig(fig_name, dpi=300)
