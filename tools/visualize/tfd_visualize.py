@@ -17,9 +17,7 @@ import numpy as np
 import pandas as pd
 import scipy.interpolate as interp
 
-import sys
-sys.path.append("../..")
-from projects.dataset.dair_map_api import DAIRMap
+from projects.dataset.dair_map_api import DAIRV2XMap
 
 _ZORDER = {
     "TARGET_AGENT": 15, "AV": 10, "COVEH": 10,
@@ -62,6 +60,8 @@ def viz_static(
     df: pd.DataFrame,
     lane_centerlines: Optional[List[np.ndarray]] = None,
     show: bool = False,
+    save: bool = False,
+    fig_name: Optional[str] = "figures/static_viz.png",
     smoothen: bool = True,
 ) -> None:
     # Seq data
@@ -69,7 +69,7 @@ def viz_static(
 
     if lane_centerlines is None:
         # Get API for DAIR Dataset map
-        avm = DAIRMap()
+        avm = DAIRV2XMap()
         seq_lane_props = avm.city_lane_centerlines_dict[city_name]
 
     _, ax = plt.subplots(figsize=(12, 8))
@@ -191,3 +191,5 @@ def viz_static(
     plt.axis("off")
     if show:
         plt.show()
+    if save:
+        plt.savefig(fig_name, dpi=300)
