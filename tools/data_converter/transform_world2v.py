@@ -217,7 +217,7 @@ def gen_new_label(path_cooperative_label, path_novatel2world, path_lidar2novatel
     write_json(path_save, new_label)
 
 
-def get_label2v(path_c: Path, path_dest: Path):
+def get_world2v(path_c: Path, path_dest: Path):
     # make directory for output label
     mkdir_p(path_dest)
 
@@ -257,7 +257,7 @@ def main():
     args = parser.parse_args()
 
     # generate label in vehicle lidar coordinate
-    get_label2v(args.root_dir, args.output_dir)
+    get_world2v(args.root_dir, args.output_dir)
 
 if __name__ == "__main__":
     main()
