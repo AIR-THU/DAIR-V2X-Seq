@@ -162,12 +162,22 @@ def get_i2v(base, output_dir):
 
 
 def main():
-    # parameters
-    parser = argparse.ArgumentParser("Convert The Point Cloud from Infrastructure to Ego-vehicle")
-    parser.add_argument("--root-dir", type=str, required=True, help="Raw data root about SPD.")
-    parser.add_argument("--output-dir", type=str, required=True, help="The data root where the data with ego-vehicle coordinate is generated")
+    parser = argparse.ArgumentParser("Convert the point cloud from infrastructure to ego-vehicle")
+    parser.add_argument(
+        "--root-dir",
+        type=str,
+        required=True,
+        help="Raw data root about SPD."
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        required=True,
+        help="The data root where the data with ego-vehicle coordinate is generated"
+    )
     args = parser.parse_args()
 
+    # convert point cloud from infrastructure to vehicle
     get_i2v(args.root_dir, args.output_dir)
 
 if __name__ == "__main__":
