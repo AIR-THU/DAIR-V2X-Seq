@@ -4,7 +4,6 @@ import errno
 import numpy as np
 import cv2
 import pickle
-from pathlib import Path
 
 
 def mkdir_p(path):
