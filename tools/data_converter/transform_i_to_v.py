@@ -183,12 +183,16 @@ def main():
     )
     args = parser.parse_args()
 
+    base = args.root_dir
+    output_dir = args.output_dir
+
     # convert point cloud from infrastructure to vehicle
-    transform_i_to_v(args.root_dir, args.output_dir)
+    # transform_i_to_v(base, output_dir)
 
     if args.visualize:
         # animate the point clouds for infrastructure and vehicle
-        animate_point_clouds(args.root_dir, args.output_dir, args.root_dir / "vehicle-side" / "velodyne")
+        animate_point_clouds(base, output_dir, base / "vehicle-side" / "velodyne")
+
 
 if __name__ == "__main__":
     main()
