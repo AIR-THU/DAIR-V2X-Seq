@@ -1,5 +1,3 @@
-import os
-import json
 import argparse
 import numpy as np
 from pypcd import pypcd
@@ -113,7 +111,7 @@ def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_w
 
 def read_pcd(path_pcd):
     pointpillar = o3d.io.read_point_cloud(path_pcd)
-    
+
     return np.asarray(pointpillar.points)
 
 
