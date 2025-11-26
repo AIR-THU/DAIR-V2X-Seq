@@ -5,6 +5,7 @@ import open3d as o3d
 from tqdm import tqdm
 from pathlib import Path
 from tools.data_converter.utils import read_json, mkdir_p
+from tools.visualize.point_cloud_animator import PointCloudAnimator
 
 """
             virtuallidar_to_world
@@ -141,6 +142,10 @@ def transform_i_to_v(base: Path, output_dir: Path):
     i_data_info = read_json(base / "infrastructure-side" / "data_info.json")
     v_data_info = read_json(base / "vehicle-side" / "data_info.json")
 
+    # point cloud animator
+    i_animator = PointCloudAnimator(window_name="Infrastructure Frames")
+    v_animator = PointCloudAnimator(window_name="Vehicle Frames")
+
     for data in tqdm(c_data_info):
         # get data according to frame id
         i_data = get_data(i_data_info, data["infrastructure_frame"])
@@ -156,6 +161,13 @@ def transform_i_to_v(base: Path, output_dir: Path):
             delta_y=data["system_error_offset"]["delta_y"],
             save_path=output_dir / f"{data['infrastructure_frame']}.pcd"
         )
+
+        # visualize point clouds
+        i_animator.update(output_dir, "infrastructure", data, last_frame=(data == c_data_info[-1]))
+        v_animator.update(base / "vehicle-side" / "velodyne", "vehicle", data, last_frame=(data == c_data_info[-1]))
+
+    i_animator.close()
+    v_animator.close()
 
 
 def main():
