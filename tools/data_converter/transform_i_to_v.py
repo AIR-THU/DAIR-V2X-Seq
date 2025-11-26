@@ -109,19 +109,14 @@ def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_w
     return point
 
 
-def read_pcd(path_pcd):
-    pointpillar = o3d.io.read_point_cloud(path_pcd)
+def read_pcd(pcd_path):
+    pointpillar = o3d.io.read_point_cloud(pcd_path)
 
     return np.asarray(pointpillar.points)
 
 
-def show_pcd(path_pcd):
-    pcd = read_pcd(path_pcd)
-    o3d.visualization.draw_geometries([pcd])
-
-
-def write_pcd(path_pcd, new_points, path_save):
-    pc = pypcd.PointCloud.from_path(path_pcd)
+def write_pcd(pcd_path, new_points, path_save):
+    pc = pypcd.PointCloud.from_path(pcd_path)
     pc.pc_data['x'] = np.array([a[0] for a in new_points])
     pc.pc_data['y'] = np.array([a[1] for a in new_points])
     pc.pc_data['z'] = np.array([a[2] for a in new_points])
