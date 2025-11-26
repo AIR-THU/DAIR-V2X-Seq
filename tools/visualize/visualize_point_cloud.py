@@ -35,7 +35,7 @@ def main():
     parser.add_argument(
         "--infrastructure-pcd-dir",
         type=Path,
-        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "label_new",
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "velodyne_new",
         help="Directory containing infrastructure point clouds in PCD format",
     )
     parser.add_argument(
