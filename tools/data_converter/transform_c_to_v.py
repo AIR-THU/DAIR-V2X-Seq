@@ -135,7 +135,7 @@ def get_data(data_info):
             return data
 
 
-def trans(input_point, translation, rotation):
+def transform(input_point, translation, rotation):
     input_point = np.array(input_point).reshape(3, 1)
     translation = np.array(translation).reshape(3, 1)
     rotation = np.array(rotation).reshape(3, 3)
@@ -165,13 +165,13 @@ def transform_world_to_lidar(point, path_novatel_to_world, path_lidar_to_novatel
     rotation, translation = get_novatel_to_world(path_novatel_to_world)
     new_rotation = rev_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
-    point = trans(point, new_translation, new_rotation)
+    point = transform(point, new_translation, new_rotation)
 
     # novatel to lidar
     rotation, translation = get_lidar_to_novatel(path_lidar_to_novatel)
     new_rotation = rev_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
-    point = trans(point, new_translation, new_rotation)
+    point = transform(point, new_translation, new_rotation)
 
     return point.reshape(1, 3).tolist()[0]
 
@@ -231,18 +231,16 @@ def transform_c_to_v(base: Path, output_dir: Path):
     v_data_info = read_json(base / "vehicle-side" / "data_info.json")
 
     for data in tqdm(c_data_info):
-        # cooperative label path
-        cooperative_label_path = base / "cooperative" / "label" / f"{data['vehicle_frame']}.json"
-
         # vehicle data
         v_data = get_data(v_data_info)
 
-        # vehicle calibration path
-        novatel_to_world_path = base / "vehicle-side" / v_data["calib_novatel_to_world_path"]
-        lidar_to_novatel_path = base / "vehicle-side" / v_data["calib_lidar_to_novatel_path"]
-
         # generate new label in vehicle lidar coordinate
-        set_new_label(cooperative_label_path, novatel_to_world_path, lidar_to_novatel_path, output_dir / f"{data['vehicle_frame']}.json")
+        set_new_label(
+            cooperative_label_path=base / "cooperative" / "label" / f"{data['vehicle_frame']}.json",
+            novatel_to_world_path=base / "vehicle-side" / v_data["calib_novatel_to_world_path"],
+            lidar_to_novatel_path=base / "vehicle-side" / v_data["calib_lidar_to_novatel_path"],
+            save_path=output_dir / f"{data['vehicle_frame']}.json"
+        )
 
 
 def main():
