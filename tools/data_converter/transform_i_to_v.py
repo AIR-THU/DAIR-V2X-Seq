@@ -142,10 +142,6 @@ def transform_i_to_v(base: Path, output_dir: Path):
     i_data_info = read_json(base / "infrastructure-side" / "data_info.json")
     v_data_info = read_json(base / "vehicle-side" / "data_info.json")
 
-    # point cloud animator
-    i_animator = PointCloudAnimator(window_name="Infrastructure Frames")
-    v_animator = PointCloudAnimator(window_name="Vehicle Frames")
-
     for data in tqdm(c_data_info):
         # get data according to frame id
         i_data = get_data(i_data_info, data["infrastructure_frame"])
@@ -162,32 +158,47 @@ def transform_i_to_v(base: Path, output_dir: Path):
             save_path=output_dir / f"{data['infrastructure_frame']}.pcd"
         )
 
+
+def animate_point_clouds(base: Path, output_dir: Path):
+    # read data info
+    c_data_info = read_json(base / "cooperative" / "data_info.json")
+    
+    # point cloud animator
+    i_animator = PointCloudAnimator(window_name="Infrastructure Frames")
+    v_animator = PointCloudAnimator(window_name="Vehicle Frames")
+
+    for data in tqdm(c_data_info):
         # visualize point clouds
         i_animator.update(output_dir, "infrastructure", data, last_frame=(data == c_data_info[-1]))
         v_animator.update(base / "vehicle-side" / "velodyne", "vehicle", data, last_frame=(data == c_data_info[-1]))
 
     i_animator.close()
     v_animator.close()
-
+    
 
 def main():
+    # root of the dataset repository
+    cwd = Path(__file__).resolve().parents[2]
+
     parser = argparse.ArgumentParser("Convert the point cloud from infrastructure to ego-vehicle")
     parser.add_argument(
         "--root-dir",
         type=Path,
-        required=True,
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example",
         help="Raw data root about SPD."
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        required=True,
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "label_new",
         help="The data root where the data with ego-vehicle coordinate is generated"
     )
     args = parser.parse_args()
 
     # convert point cloud from infrastructure to vehicle
     transform_i_to_v(args.root_dir, args.output_dir)
+    # animate the point clouds for infrastructure and vehicle
+    animate_point_clouds(args.root_dir, args.output_dir)
 
 if __name__ == "__main__":
     main()
