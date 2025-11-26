@@ -5,7 +5,7 @@ import open3d as o3d
 from tqdm import tqdm
 from pathlib import Path
 from tools.data_converter.utils import read_json, mkdir_p
-from tools.visualize.point_cloud_animator import PointCloudAnimator
+from tools.visualize.visualize_point_cloud import animate_point_clouds
 
 """
             virtuallidar_to_world
@@ -157,23 +157,6 @@ def transform_i_to_v(base: Path, output_dir: Path):
             delta_y=data["system_error_offset"]["delta_y"],
             save_path=output_dir / f"{data['infrastructure_frame']}.pcd"
         )
-
-
-def animate_point_clouds(base: Path, output_dir: Path):
-    # read data info
-    c_data_info = read_json(base / "cooperative" / "data_info.json")
-    
-    # point cloud animator
-    i_animator = PointCloudAnimator(window_name="Infrastructure Frames")
-    v_animator = PointCloudAnimator(window_name="Vehicle Frames")
-
-    for data in tqdm(c_data_info):
-        # visualize point clouds
-        i_animator.update(output_dir, "infrastructure", data, last_frame=(data == c_data_info[-1]))
-        v_animator.update(base / "vehicle-side" / "velodyne", "vehicle", data, last_frame=(data == c_data_info[-1]))
-
-    i_animator.close()
-    v_animator.close()
     
 
 def main():
@@ -205,7 +188,7 @@ def main():
 
     if args.visualize:
         # animate the point clouds for infrastructure and vehicle
-        animate_point_clouds(args.root_dir, args.output_dir)
+        animate_point_clouds(args.root_dir, args.output_dir, args.root_dir / "vehicle-side" / "velodyne")
 
 if __name__ == "__main__":
     main()
