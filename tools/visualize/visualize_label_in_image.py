@@ -1,9 +1,9 @@
 import argparse
 from pathlib import Path
-from vis_utils import get_cam_8_points, read_json, vis_label_in_img
+from tools.visualize.utils import get_cam_8_points, read_json, visualize_label_in_img
 
 
-def vis_label_in_image(root_path: Path, output_path: Path):
+def visualize_label_in_image(root_path: Path, output_path: Path):
     # get data_info
     data_infos = read_json(root_path / "data_info.json")
 
@@ -32,7 +32,7 @@ def vis_label_in_image(root_path: Path, output_path: Path):
         cam_intrinsic_path = root_path /  data_info["calib_camera_intrinsic_path"]
 
         # draw and save the image with projected 3D bounding boxes
-        vis_label_in_img(camera_8_points_list, image_path, cam_intrinsic_path, output_path)
+        visualize_label_in_img(camera_8_points_list, image_path, cam_intrinsic_path, output_path)
 
 
 def main():
@@ -56,7 +56,7 @@ def main():
     args.output_path.mkdir(parents=True, exist_ok=True)
 
     # visualize labels in images
-    vis_label_in_image(args.root_path, args.output_path)
+    visualize_label_in_image(args.root_path, args.output_path)
 
 if __name__ == "__main__":
     main()

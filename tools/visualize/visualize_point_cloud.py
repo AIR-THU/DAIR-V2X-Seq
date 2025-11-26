@@ -4,6 +4,7 @@ from tqdm import tqdm
 from tools.data_converter.utils import read_json
 from tools.visualize.point_cloud_animator import PointCloudAnimator
 
+
 def animate_point_clouds(base, infrastructure_pcd_dir: Path, vehicle_pcd_dir: Path):
     # read data info
     c_data_info = read_json(base / "cooperative" / "data_info.json")
