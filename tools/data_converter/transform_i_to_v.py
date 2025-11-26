@@ -193,12 +193,19 @@ def main():
         default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "label_new",
         help="The data root where the data with ego-vehicle coordinate is generated"
     )
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        help="If set, animate point clouds after conversion."
+    )
     args = parser.parse_args()
 
     # convert point cloud from infrastructure to vehicle
     transform_i_to_v(args.root_dir, args.output_dir)
-    # animate the point clouds for infrastructure and vehicle
-    animate_point_clouds(args.root_dir, args.output_dir)
+
+    if args.visualize:
+        # animate the point clouds for infrastructure and vehicle
+        animate_point_clouds(args.root_dir, args.output_dir)
 
 if __name__ == "__main__":
     main()
