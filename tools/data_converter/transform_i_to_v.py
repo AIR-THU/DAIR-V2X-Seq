@@ -124,7 +124,7 @@ def write_pcd(pcd_path, new_points, path_save):
     pc.save_pcd(path_save, compression='binary_compressed')
 
 
-def set_new_label(infrastructure_pcd_path: Path, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float, save_path: Path):
+def transform_i_to_v(infrastructure_pcd_path: Path, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float, save_path: Path):
     # (n, 3)
     points = read_pcd(infrastructure_pcd_path)
     # (n, 3)
@@ -133,7 +133,7 @@ def set_new_label(infrastructure_pcd_path: Path, virtual_lidar_to_world_path: Pa
     write_pcd(infrastructure_pcd_path, new_points, save_path)
 
 
-def transform_i_to_v(base: Path, output_dir: Path):
+def process_dataset(base: Path, output_dir: Path):
     # make directory for output label
     mkdir_p(output_dir)
 
@@ -148,7 +148,7 @@ def transform_i_to_v(base: Path, output_dir: Path):
         v_data = get_data(v_data_info, data["vehicle_frame"])
 
         # transform point cloud from infrastructure to vehicle
-        set_new_label(
+        transform_i_to_v(
             infrastructure_pcd_path=base / "infrastructure-side" / "velodyne" / f"{data['infrastructure_frame']}.pcd",
             virtual_lidar_to_world_path=base / "infrastructure-side" / i_data["calib_virtuallidar_to_world_path"],
             novatel_to_world_path=base / "vehicle-side" / v_data["calib_novatel_to_world_path"],
@@ -187,7 +187,7 @@ def main():
     output_dir = args.output_dir
 
     # convert point cloud from infrastructure to vehicle
-    transform_i_to_v(base, output_dir)
+    process_dataset(base, output_dir)
 
     if args.visualize:
         # animate the point clouds for infrastructure and vehicle

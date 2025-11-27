@@ -1,12 +1,52 @@
 import argparse
 from pathlib import Path
 import numpy as np
-import os
 from tqdm import tqdm
 from pypcd import pypcd
 import open3d as o3d
-
 from tools.data_converter.utils import read_json, mkdir_p
+
+"""
+            virtual_lidar_to_world
+inf lidar ------------------------> world coordinate <===== label_world
+              relative error             ^
+                                         |
+                                         |
+                                         |
+                                         |
+                                         | novatel_to_world
+                                         |
+                                         |
+                                         |
+                                         |
+              lidar_to_novatel           |
+veh lidar --------------------------> novatel
+
+"""
+
+
+"""
+   (x0y0z0, x0y0z1, x0y1z1, x0y1z0, x1y0z0, x1y0z1, x1y1z1, x1y1z0)
+
+   ..code - block:: none
+
+
+                        front z
+                             /
+                            /
+              (x0, y0, z1) + -----------  + (x1, y0, z1)
+                          /|            / |
+                         / |           /  |
+           (x0, y0, z0) + ----------- +   + (x1, y1, z1)
+                        |  /      .   |  /
+                        | / origin    | /
+           (x0, y1, z0) + ----------- + -------> x right
+                        |             (x1, y1, z0)
+                        |
+                        v
+                   down y
+
+   """
 
 
 def get_virtual_lidar_to_world(virtual_lidar_to_world_path: Path):

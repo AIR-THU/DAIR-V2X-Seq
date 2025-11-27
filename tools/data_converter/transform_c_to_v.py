@@ -217,12 +217,12 @@ def label_world_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, 
     return new_label
 
 
-def set_new_label(cooperative_label_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, save_path: Path):
+def transform_c_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, save_path: Path):
     new_label = label_world_to_v(cooperative_label_path, novatel_to_world_path, lidar_to_novatel_path)
     write_json(save_path, new_label)
 
 
-def transform_c_to_v(base: Path, output_dir: Path):
+def process_dataset(base: Path, output_dir: Path):
     # make directory for output label
     mkdir_p(output_dir)
 
@@ -235,7 +235,7 @@ def transform_c_to_v(base: Path, output_dir: Path):
         v_data = get_data(v_data_info)
 
         # generate new label in vehicle lidar coordinate
-        set_new_label(
+        transform_c_to_v(
             cooperative_label_path=base / "cooperative" / "label" / f"{data['vehicle_frame']}.json",
             novatel_to_world_path=base / "vehicle-side" / v_data["calib_novatel_to_world_path"],
             lidar_to_novatel_path=base / "vehicle-side" / v_data["calib_lidar_to_novatel_path"],
@@ -260,7 +260,7 @@ def main():
     args = parser.parse_args()
 
     # generate label in vehicle lidar coordinate
-    transform_c_to_v(args.root_dir, args.output_dir)
+    process_dataset(args.root_dir, args.output_dir)
 
 if __name__ == "__main__":
     main()
