@@ -107,27 +107,17 @@ def write_pcd_from_points(src_pcd_path: Path, points: np.ndarray, out_pcd_path: 
         o3d.io.write_point_cloud(str(out_pcd_path), pc_o3d)
 
 
-def process_dataset(base: Path):
+def process_infrastructure(base: Path):
+    """
+    Process infrastructure-side data: transform lidar point clouds to world coordinates.
+    """
     i_output_dir = base / "infrastructure-side" / "velodyne_world"
-    v_output_dir = base / "vehicle-side" / "velodyne_world"
-
     mkdir_p(i_output_dir)
-    mkdir_p(v_output_dir)
 
-    # read data_info
-    c_data_info = read_json(base / "cooperative" / "data_info.json")
     i_data_info = read_json(base / "infrastructure-side" / "data_info.json")
-    v_data_info = read_json(base / "vehicle-side" / "data_info.json")
 
-    for data in tqdm(c_data_info, desc="frames"):
-        infra_frame = data["infrastructure_frame"]
-        veh_frame = data["vehicle_frame"]
-
-        # find entries by frame
-        i_entry = next((d for d in i_data_info if d["frame_id"] == infra_frame), None)
-        v_entry = next((d for d in v_data_info if d["frame_id"] == veh_frame), None)
-
-        # infrastructure: transform infra virtual lidar -> world
+    for i_entry in tqdm(i_data_info, desc="Processing infrastructure frames"):
+        infra_frame = i_entry["frame_id"]
         try:
             infra_pcd = base / "infrastructure-side" / "velodyne" / f"{infra_frame}.pcd"
             virt_calib = base / "infrastructure-side" / i_entry["calib_virtuallidar_to_world_path"]
@@ -145,7 +135,18 @@ def process_dataset(base: Path):
         except Exception as e:
             print(f"Skipping infra frame {infra_frame}: {e}")
 
-        # vehicle: transform vehicle lidar -> novatel -> world
+
+def process_vehicle(base: Path):
+    """
+    Process vehicle-side data: transform lidar point clouds to world coordinates.
+    """
+    v_output_dir = base / "vehicle-side" / "velodyne_world"
+    mkdir_p(v_output_dir)
+
+    v_data_info = read_json(base / "vehicle-side" / "data_info.json")
+
+    for v_entry in tqdm(v_data_info, desc="Processing vehicle frames"):
+        veh_frame = v_entry["frame_id"]
         try:
             veh_pcd = base / "vehicle-side" / "velodyne" / f"{veh_frame}.pcd"
             lidar2novatel_calib = base / "vehicle-side" / v_entry["calib_lidar_to_novatel_path"]
@@ -165,6 +166,14 @@ def process_dataset(base: Path):
             )
         except Exception as e:
             print(f"Skipping vehicle frame {veh_frame}: {e}")
+
+
+def process_dataset(base: Path):
+    """
+    Processes both infrastructure and vehicle datasets to transform point clouds to world coordinates.
+    """
+    process_infrastructure(base)
+    process_vehicle(base)
 
 
 def main():
