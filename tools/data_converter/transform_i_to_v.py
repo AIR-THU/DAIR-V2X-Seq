@@ -8,7 +8,7 @@ from tools.data_converter.utils import read_json, mkdir_p
 from tools.visualize.visualize_point_cloud import animate_point_clouds
 
 """
-            virtuallidar_to_world
+            virtual_lidar_to_world
 inf lidar ------------------------> world coordinate <===== label_world
               relative error             ^
                                          |
@@ -187,7 +187,7 @@ def main():
     output_dir = args.output_dir
 
     # convert point cloud from infrastructure to vehicle
-    # transform_i_to_v(base, output_dir)
+    transform_i_to_v(base, output_dir)
 
     if args.visualize:
         # animate the point clouds for infrastructure and vehicle
