@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 from tqdm import tqdm
-from tools.data_converter.utils import read_json
+from tools.utils import read_json
 from tools.visualize.point_cloud_animator import PointCloudAnimator
 
 
@@ -36,7 +36,7 @@ def main():
     parser.add_argument(
         "--infrastructure-pcd-dir",
         type=Path,
-        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "velodyne_vehicle",
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "infrastructure-side" / "velodyne",
         help="Directory containing infrastructure point clouds in PCD format",
     )
     parser.add_argument(
