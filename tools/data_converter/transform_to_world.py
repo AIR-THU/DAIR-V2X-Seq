@@ -5,6 +5,7 @@ from tqdm import tqdm
 from pypcd import pypcd
 import open3d as o3d
 from tools.data_converter.utils import read_json, mkdir_p
+from tools.visualize.visualize_point_cloud import animate_point_clouds
 
 """
             virtual_lidar_to_world
@@ -177,9 +178,24 @@ def main():
         default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example",
         help="Raw data root (contains cooperative, infrastructure-side, vehicle-side)"
     )
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        help="If set, animate point clouds after conversion."
+    )
     args = parser.parse_args()
 
-    process_dataset(args.root_dir)
+    base = args.root_dir
+
+    process_dataset(base)
+
+    if args.visualize:
+        # animate the point clouds for infrastructure and vehicle
+        animate_point_clouds(
+            base,
+            base / "infrastructure-side" / "velodyne_world",
+            base / "vehicle-side" / "velodyne_world"
+        )
 
 
 if __name__ == '__main__':
