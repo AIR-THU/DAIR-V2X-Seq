@@ -4,7 +4,7 @@ from pypcd import pypcd
 import open3d as o3d
 from tqdm import tqdm
 from pathlib import Path
-from tools.data_converter.utils import read_json, mkdir_p
+import tools.utils as utils
 from tools.visualize.visualize_point_cloud import animate_point_clouds
 
 """
@@ -50,36 +50,10 @@ veh lidar --------------------------> novatel
    """
 
 
-def get_virtual_lidar_to_world(virtual_lidar_to_world_path: Path):
-    virtual_lidar_to_world = read_json(virtual_lidar_to_world_path)
-
-    return virtual_lidar_to_world['rotation'], virtual_lidar_to_world['translation']
-
-
-def get_novatel_to_world(novatel_to_world_path: Path):
-    novatel_to_world = read_json(novatel_to_world_path)
-
-    return novatel_to_world['rotation'], novatel_to_world['translation']
-
-
-def get_lidar_to_novatel(lidar_to_novatel_path: Path):
-    lidar_to_novatel = read_json(lidar_to_novatel_path)
-    
-    return lidar_to_novatel['transform']['rotation'], lidar_to_novatel['transform']['translation']
-
-
 def get_data(data_info, frame_id):
     for data in data_info:
         if data["frame_id"] == frame_id:
             return data
-
-
-def transform(input_point, translation, rotation):
-    input_point = np.array(input_point).reshape(3, -1)
-    translation = np.array(translation).reshape(3, 1)
-    rotation = np.array(rotation).reshape(3, 3)
-    output_point = np.dot(rotation, input_point).reshape(3, -1) + np.array(translation).reshape(3, 1)
-    return output_point
 
 
 def rev_matrix(R):
@@ -91,29 +65,23 @@ def rev_matrix(R):
 
 def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float):
     # virtual lidar to world
-    rotation, translation = get_virtual_lidar_to_world(virtual_lidar_to_world_path)
-    point = transform(input_point, translation, rotation)
+    rotation, translation = utils.get_virtual_lidar_to_world(virtual_lidar_to_world_path)
+    point = utils.transform(input_point, translation, rotation)
 
     # world to novatel
-    rotation, translation = get_novatel_to_world(novatel_to_world_path)
+    rotation, translation = utils.get_novatel_to_world(novatel_to_world_path)
     new_rotation = rev_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
-    point = transform(point, new_translation, new_rotation)
+    point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
-    rotation, translation = get_lidar_to_novatel(lidar_to_novatel_path)
+    rotation, translation = utils.get_lidar_to_novatel(lidar_to_novatel_path)
     new_rotation = rev_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
-    point = transform(point, new_translation, new_rotation) + np.array([delta_x, delta_y, 0]).reshape(3, 1)
+    point = utils.transform(point, new_translation, new_rotation) + np.array([delta_x, delta_y, 0]).reshape(3, 1)
     point = point.T
     
     return point
-
-
-def read_pcd(pcd_path):
-    pointpillar = o3d.io.read_point_cloud(pcd_path)
-
-    return np.asarray(pointpillar.points)
 
 
 def write_pcd(pcd_path, new_points, path_save):
@@ -126,7 +94,7 @@ def write_pcd(pcd_path, new_points, path_save):
 
 def transform_i_to_v(infrastructure_pcd_path: Path, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float, save_path: Path):
     # (n, 3)
-    points = read_pcd(infrastructure_pcd_path)
+    points = utils.read_pcd(infrastructure_pcd_path)
     # (n, 3)
     new_points = transform_virtual_lidar_to_lidar(points.T, virtual_lidar_to_world_path, novatel_to_world_path, lidar_to_novatel_path, delta_x, delta_y)
     # save point cloud
@@ -135,12 +103,12 @@ def transform_i_to_v(infrastructure_pcd_path: Path, virtual_lidar_to_world_path:
 
 def process_dataset(base: Path, output_dir: Path):
     # make directory for output label
-    mkdir_p(output_dir)
+    utils.mkdir_p(output_dir)
 
     # read data info
-    c_data_info = read_json(base / "cooperative" / "data_info.json")
-    i_data_info = read_json(base / "infrastructure-side" / "data_info.json")
-    v_data_info = read_json(base / "vehicle-side" / "data_info.json")
+    c_data_info = utils.read_json(base / "cooperative" / "data_info.json")
+    i_data_info = utils.read_json(base / "infrastructure-side" / "data_info.json")
+    v_data_info = utils.read_json(base / "vehicle-side" / "data_info.json")
 
     for data in tqdm(c_data_info):
         # get data according to frame id
