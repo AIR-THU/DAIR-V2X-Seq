@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from tools.visualize.utils import get_cam_8_points, read_json, visualize_label_in_img
+from tools.utils import get_cam_8_points, read_json, visualize_label_in_img
 
 
 def visualize_label_in_image(root_path: Path, output_path: Path):
