@@ -4,10 +4,10 @@ import numpy as np
 from tqdm import tqdm
 import math
 import argparse
-from tools.data_converter.utils import read_json, write_json, mkdir_p
+import tools.utils as utils
 
 """
-            virtuallidar_to_world
+            virtual_lidar_to_world
 inf lidar ------------------------> world coordinate <===== label_world
               relative error             ^
                                          |
@@ -112,20 +112,6 @@ def get_world_8_points(data_label_world):
     return points
 
 
-def get_novatel_to_world(path_novatel_to_world):
-    novatel_to_world = read_json(path_novatel_to_world)
-
-    return novatel_to_world["rotation"], novatel_to_world["translation"]
-
-
-def get_lidar_to_novatel(path_lidar_to_novatel):
-    lidar_to_novatel = read_json(path_lidar_to_novatel)
-    rotation = lidar_to_novatel["transform"]["rotation"]
-    translation = lidar_to_novatel["transform"]["translation"]
-
-    return rotation, translation
-
-
 def get_data(data_info):
     for data in data_info:
         path_pcd = data["pointcloud_path"]
@@ -133,21 +119,6 @@ def get_data(data_info):
         name2 = os.path.split(data["pointcloud_path"])[-1]
         if name1 == name2:
             return data
-
-
-def transform(input_point, translation, rotation):
-    input_point = np.array(input_point).reshape(3, 1)
-    translation = np.array(translation).reshape(3, 1)
-    rotation = np.array(rotation).reshape(3, 3)
-    
-    return np.dot(rotation, input_point).reshape(3, 1) + np.array(translation).reshape(3, 1)
-
-
-def rev_matrix(R):
-    R = np.matrix(R)
-    rev_R = R.I
-
-    return np.array(rev_R)
 
 
 def get_rotation(world_8_points, my_3d_point, length, w):
@@ -162,23 +133,23 @@ def get_rotation(world_8_points, my_3d_point, length, w):
 
 def transform_world_to_lidar(point, path_novatel_to_world, path_lidar_to_novatel):
     # world to novatel
-    rotation, translation = get_novatel_to_world(path_novatel_to_world)
-    new_rotation = rev_matrix(rotation)
+    rotation, translation = utils.get_novatel_to_world(path_novatel_to_world)
+    new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
-    point = transform(point, new_translation, new_rotation)
+    point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
-    rotation, translation = get_lidar_to_novatel(path_lidar_to_novatel)
-    new_rotation = rev_matrix(rotation)
+    rotation, translation = utils.get_lidar_to_novatel(path_lidar_to_novatel)
+    new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
-    point = transform(point, new_translation, new_rotation)
+    point = utils.transform(point, new_translation, new_rotation)
 
     return point.reshape(1, 3).tolist()[0]
 
 
 def label_world_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path):
     # read cooperative label
-    label_world = read_json(cooperative_label_path)
+    label_world = utils.read_json(cooperative_label_path)
 
     new_label = []
 
@@ -219,16 +190,16 @@ def label_world_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, 
 
 def transform_c_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, save_path: Path):
     new_label = label_world_to_v(cooperative_label_path, novatel_to_world_path, lidar_to_novatel_path)
-    write_json(save_path, new_label)
+    utils.write_json(new_label, save_path)
 
 
 def process_dataset(base: Path, output_dir: Path):
     # make directory for output label
-    mkdir_p(output_dir)
+    utils.mkdir_p(output_dir)
 
     # read data info
-    c_data_info = read_json(base / "cooperative" / "data_info.json")
-    v_data_info = read_json(base / "vehicle-side" / "data_info.json")
+    c_data_info = utils.read_json(base / "cooperative" / "data_info.json")
+    v_data_info = utils.read_json(base / "vehicle-side" / "data_info.json")
 
     for data in tqdm(c_data_info):
         # vehicle data
@@ -244,17 +215,20 @@ def process_dataset(base: Path, output_dir: Path):
 
 
 def main():
+    # root of the dataset repository
+    cwd = Path(__file__).resolve().parents[2]
+
     parser = argparse.ArgumentParser("Generate label from cooperative coordinate to vehicle lidar coordinate.")
     parser.add_argument(
         "--root-dir",
         type=Path,
-        default=Path("./data/cooperative-vehicle-infrastructure"),
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example",
         help="Raw data root about DAIR-V2X-C.",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("./label_new"),
+        default=cwd / "dataset" / "v2x-seq-spd" / "V2X-Seq-SPD-Example" / "cooperative" / "label_vehicle",
         help="The label root where the label is in vehicle lidar coordinate system.",
     )
     args = parser.parse_args()
