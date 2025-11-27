@@ -1,7 +1,6 @@
 import argparse
 import numpy as np
 from pypcd import pypcd
-import open3d as o3d
 from tqdm import tqdm
 from pathlib import Path
 import tools.utils as utils
