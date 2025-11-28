@@ -64,17 +64,17 @@ def rev_matrix(R):
 
 def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float):
     # virtual lidar to world
-    rotation, translation = utils.get_virtual_lidar_to_world(virtual_lidar_to_world_path)
+    rotation, translation = utils.get_rotation_translation(virtual_lidar_to_world_path)
     point = utils.transform(input_point, translation, rotation)
 
     # world to novatel
-    rotation, translation = utils.get_novatel_to_world(novatel_to_world_path)
+    rotation, translation = utils.get_rotation_translation(novatel_to_world_path)
     new_rotation = rev_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
-    rotation, translation = utils.get_lidar_to_novatel(lidar_to_novatel_path)
+    rotation, translation = utils.get_rotation_translation(lidar_to_novatel_path)
     new_rotation = rev_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation) + np.array([delta_x, delta_y, 0]).reshape(3, 1)

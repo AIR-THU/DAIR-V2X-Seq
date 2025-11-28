@@ -12,20 +12,6 @@ def mkdir_p(path: Path):
     path.mkdir(parents=True, exist_ok=True)
 
 
-def get_files_path(path_my_dir, extention=".json"):
-    path_list = []
-    for (dirpath, _, filenames) in os.walk(path_my_dir):
-        for filename in filenames:
-            if os.path.splitext(filename)[1] == extention:
-                path_list.append(os.path.join(dirpath, filename))
-    return path_list
-
-
-def write_txt(path, file):
-    with open(path, "w") as f:
-        f.write(file)
-
-
 def read_json(path: Path) -> dict:
     """Read a JSON file and return a dictionary."""
     with open(path, 'r') as f:
@@ -96,24 +82,13 @@ def transform(input_point, translation, rotation):
     return output_point
 
 
-def get_lidar_to_camera(lidar_to_camera_path: Path):
-    cfg = read_json(lidar_to_camera_path)
-    return cfg['rotation'], cfg['translation']
+def get_rotation_translation(path: Path):
+    cfg = read_json(path)
 
-
-def get_lidar_to_novatel(lidar_to_novatel_path: Path):
-    cfg = read_json(lidar_to_novatel_path)
-    return cfg['transform']['rotation'], cfg['transform']['translation']
-
-
-def get_novatel_to_world(novatel_to_world_path: Path):
-    cfg = read_json(novatel_to_world_path)
-    return cfg['rotation'], cfg['translation']
-
-
-def get_virtual_lidar_to_world(virtual_lidar_to_world_path: Path):
-    cfg = read_json(virtual_lidar_to_world_path)
-    return cfg['rotation'], cfg['translation']
+    if 'transform' in cfg:
+        return cfg['transform']['rotation'], cfg['transform']['translation']
+    else:
+        return cfg['rotation'], cfg['translation']
 
 
 def get_label(label):

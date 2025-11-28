@@ -133,13 +133,13 @@ def get_rotation(world_8_points, my_3d_point, length, w):
 
 def transform_world_to_lidar(point, path_novatel_to_world, path_lidar_to_novatel):
     # world to novatel
-    rotation, translation = utils.get_novatel_to_world(path_novatel_to_world)
+    rotation, translation = utils.get_rotation_translation(path_novatel_to_world)
     new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
-    rotation, translation = utils.get_lidar_to_novatel(path_lidar_to_novatel)
+    rotation, translation = utils.get_rotation_translation(path_lidar_to_novatel)
     new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)

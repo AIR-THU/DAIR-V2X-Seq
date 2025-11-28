@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from pypcd import pypcd
 import open3d as o3d
-from tools.data_converter.utils import read_json, mkdir_p
+import tools.utils as utils
 from tools.visualize.visualize_point_cloud import animate_point_clouds
 
 """
@@ -50,26 +50,6 @@ veh lidar --------------------------> novatel
    """
 
 
-def get_virtual_lidar_to_world(virtual_lidar_to_world_path: Path):
-    cfg = read_json(virtual_lidar_to_world_path)
-    return cfg['rotation'], cfg['translation']
-
-
-def get_novatel_to_world(novatel_to_world_path: Path):
-    cfg = read_json(novatel_to_world_path)
-    return cfg['rotation'], cfg['translation']
-
-
-def get_lidar_to_novatel(lidar_to_novatel_path: Path):
-    cfg = read_json(lidar_to_novatel_path)
-    return cfg['transform']['rotation'], cfg['transform']['translation']
-
-
-def rev_matrix(R):
-    R = np.matrix(R)
-    return np.array(R.I)
-
-
 def transform_points(points: np.ndarray, rotation, translation) -> np.ndarray:
     """Apply rotation and translation to Nx3 points. rotation: (3,3), translation: (3,) or (3,1)."""
     pts = np.asarray(points)
@@ -83,13 +63,6 @@ def transform_points(points: np.ndarray, rotation, translation) -> np.ndarray:
     return out.T
 
 
-def read_pcd(pcd_path: Path) -> np.ndarray:
-    if not pcd_path.exists():
-        raise FileNotFoundError(pcd_path)
-    pc = o3d.io.read_point_cloud(str(pcd_path))
-    return np.asarray(pc.points)
-
-
 def write_pcd_from_points(src_pcd_path: Path, points: np.ndarray, out_pcd_path: Path):
     # reuse header from source PCD if available; otherwise create minimal
     if src_pcd_path.exists():
@@ -97,11 +70,11 @@ def write_pcd_from_points(src_pcd_path: Path, points: np.ndarray, out_pcd_path: 
         pc.pc_data['x'] = np.array([a[0] for a in points])
         pc.pc_data['y'] = np.array([a[1] for a in points])
         pc.pc_data['z'] = np.array([a[2] for a in points])
-        mkdir_p(out_pcd_path.parent)
+        utils.mkdir_p(out_pcd_path.parent)
         pc.save_pcd(str(out_pcd_path), compression='binary_compressed')
     else:
         # fallback: write a simple PCD using open3d
-        mkdir_p(out_pcd_path.parent)
+        utils.mkdir_p(out_pcd_path.parent)
         pc_o3d = o3d.geometry.PointCloud()
         pc_o3d.points = o3d.utility.Vector3dVector(points)
         o3d.io.write_point_cloud(str(out_pcd_path), pc_o3d)
@@ -112,9 +85,9 @@ def process_infrastructure(base: Path):
     Process infrastructure-side data: transform lidar point clouds to world coordinates.
     """
     i_output_dir = base / "infrastructure-side" / "velodyne_world"
-    mkdir_p(i_output_dir)
+    utils.mkdir_p(i_output_dir)
 
-    i_data_info = read_json(base / "infrastructure-side" / "data_info.json")
+    i_data_info = utils.read_json(base / "infrastructure-side" / "data_info.json")
 
     for i_entry in tqdm(i_data_info, desc="Processing infrastructure frames"):
         infra_frame = i_entry["frame_id"]
@@ -122,9 +95,9 @@ def process_infrastructure(base: Path):
             infra_pcd = base / "infrastructure-side" / "velodyne" / f"{infra_frame}.pcd"
             virt_calib = base / "infrastructure-side" / i_entry["calib_virtuallidar_to_world_path"]
 
-            rotation, translation = get_virtual_lidar_to_world(virt_calib)
+            rotation, translation = utils.get_rotation_translation(virt_calib)
 
-            pts = read_pcd(infra_pcd)
+            pts = utils.read_pcd(infra_pcd)
             pts_world = transform_points(pts, rotation, translation)
 
             write_pcd_from_points(
@@ -132,6 +105,7 @@ def process_infrastructure(base: Path):
                 pts_world,
                 out_pcd_path=i_output_dir / f"{infra_frame}.pcd"
             )
+
         except Exception as e:
             print(f"Skipping infra frame {infra_frame}: {e}")
 
@@ -141,9 +115,9 @@ def process_vehicle(base: Path):
     Process vehicle-side data: transform lidar point clouds to world coordinates.
     """
     v_output_dir = base / "vehicle-side" / "velodyne_world"
-    mkdir_p(v_output_dir)
+    utils.mkdir_p(v_output_dir)
 
-    v_data_info = read_json(base / "vehicle-side" / "data_info.json")
+    v_data_info = utils.read_json(base / "vehicle-side" / "data_info.json")
 
     for v_entry in tqdm(v_data_info, desc="Processing vehicle frames"):
         veh_frame = v_entry["frame_id"]
@@ -152,10 +126,10 @@ def process_vehicle(base: Path):
             lidar2novatel_calib = base / "vehicle-side" / v_entry["calib_lidar_to_novatel_path"]
             novatel_calib = base / "vehicle-side" / v_entry["calib_novatel_to_world_path"]
 
-            rotation_l2n, translation_l2n = get_lidar_to_novatel(lidar2novatel_calib)
-            rotation_n2w, translation_n2w = get_novatel_to_world(novatel_calib)
+            rotation_l2n, translation_l2n = utils.get_rotation_translation(lidar2novatel_calib)
+            rotation_n2w, translation_n2w = utils.get_rotation_translation(novatel_calib)
 
-            pts = read_pcd(veh_pcd)
+            pts = utils.read_pcd(veh_pcd)
             pts_novatel = transform_points(pts, rotation_l2n, translation_l2n)
             pts_world = transform_points(pts_novatel, rotation_n2w, translation_n2w)
 
@@ -164,8 +138,41 @@ def process_vehicle(base: Path):
                 pts_world,
                 out_pcd_path=v_output_dir / f"{veh_frame}.pcd"
             )
+
         except Exception as e:
             print(f"Skipping vehicle frame {veh_frame}: {e}")
+
+
+def process_labels(label_path: Path, output_path: Path, rotation, translation):
+    """
+    Reads labels, transforms their 3D locations to the world frame, and saves them.
+    """
+    if not label_path.exists():
+        # Not all frames have labels, so this is not an error.
+        return
+
+    labels = utils.read_json(label_path)
+    transformed_labels = []
+
+    for obj in labels:
+        center_point = obj.get("3d_location")
+        if center_point is None:
+            transformed_labels.append(obj)
+            continue
+
+        # Transform the object's center point to world coordinates
+        world_center = transform_points(np.array(center_point), rotation, translation)
+
+        # Create a new dictionary or update the existing one
+        new_obj = obj.copy()
+        new_obj['world_3d_location'] = world_center.flatten().tolist()
+        # Dimensions (l, w, h) and rotation are also important for a full 3D box,
+        # but for now, we are just transforming the center.
+        transformed_labels.append(new_obj)
+
+    if transformed_labels:
+        utils.mkdir_p(output_path.parent)
+        utils.write_json(transformed_labels, output_path)
 
 
 def process_dataset(base: Path):
