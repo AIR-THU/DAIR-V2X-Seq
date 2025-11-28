@@ -1,6 +1,7 @@
 import os
 import json
 import cv2
+import math
 import numpy as np
 import open3d as o3d
 from pypcd import pypcd
@@ -80,6 +81,41 @@ def transform(input_point, translation, rotation):
     rotation = np.array(rotation).reshape(3, 3)
     output_point = np.dot(rotation, input_point).reshape(3, -1) + np.array(translation).reshape(3, 1)
     return output_point
+
+
+def write_3d_location(point):
+    x = float(point[0])
+    y = float(point[1])
+    z = float(point[2])
+
+    return x, y, z
+
+
+def write_world_8_points(points):
+    my_points = []
+    for i in range(8):
+        point = np.array(points[i]).flatten().tolist()
+        my_points.append(point)
+
+    return my_points
+
+
+def get_rotation(world_8_points, my_3d_point, length, w):
+    x = my_3d_point[0]
+    a = world_8_points[0][0]
+    b = world_8_points[1][0]
+    c = world_8_points[2][0]
+    r_tan = ((b + c - 2 * x) * length) / ((a + b - 2 * x) * w)
+
+    return math.atan(r_tan)
+
+
+def get_3d_location(data_label_world):
+    x = data_label_world["3d_location"]["x"]
+    y = data_label_world["3d_location"]["y"]
+    z = data_label_world["3d_location"]["z"]
+
+    return np.array([x, y, z]).reshape(3, 1)
 
 
 def get_rotation_translation(path: Path):
@@ -260,6 +296,44 @@ def get_cam_8_points(labels, calib_lidar2cam_path):
     return camera_8_points_list
 
 
+def get_3d_8_points(obj_size, yaw_lidar, center_lidar):
+    lidar_r = np.matrix(
+        [
+            [math.cos(yaw_lidar), -math.sin(yaw_lidar), 0],
+            [math.sin(yaw_lidar), math.cos(yaw_lidar), 0],
+            [0, 0, 1],
+        ]
+    )
+    l, w, h = obj_size
+    corners_3d_lidar = np.matrix(
+        [
+            [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],
+            [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],
+            [0, 0, 0, 0, h, h, h, h],
+        ]
+    )
+    corners_3d_lidar = lidar_r * corners_3d_lidar + np.matrix(center_lidar).T
+
+    return corners_3d_lidar.T
+
+
+def get_world_8_points(data_label_world):
+    size = data_label_world["3d_dimensions"]
+    pos = data_label_world["3d_location"]
+    box = get_3d_8_points(
+        [float(size["l"]), float(size["w"]), float(size["h"])],
+        float(data_label_world["rotation"]),
+        [float(pos["x"]), float(pos["y"]), float(pos["z"]) - float(size["h"]) / 2],
+    ).tolist()
+
+    points = []
+    for i in range(8):
+        point = np.array(box[i]).reshape(3, 1)
+        points.append(point)
+
+    return points
+
+
 def visualize_label_in_img(camera_8_points_list, img_path, cam_intrinsic_path, save_path) -> bool:
     # image frame id
     index = img_path.name.split(".")[0]
@@ -269,11 +343,11 @@ def visualize_label_in_img(camera_8_points_list, img_path, cam_intrinsic_path, s
     img = get_rgb(img_path)
 
     # convert camera 8 points to numpy array
-    cam8points = np.array(camera_8_points_list)
+    cam_8_points = np.array(camera_8_points_list)
     # number of bounding boxes
-    num_bbox = cam8points.shape[0]
+    num_bbox = cam_8_points.shape[0]
     # project 3D bounding boxes to image plane
-    uv_origin = points_cam_to_img(cam8points, calib_intrinsic)
+    uv_origin = points_cam_to_img(cam_8_points, calib_intrinsic)
     uv_origin = (uv_origin - 1).round()
 
     # plot 3D bounding boxes on image

@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import numpy as np
 from tqdm import tqdm
-import math
 import argparse
 import tools.utils as utils
 
@@ -49,69 +48,6 @@ veh lidar --------------------------> novatel
    """
 
 
-def write_3d_location(point):
-    x = float(point[0])
-    y = float(point[1])
-    z = float(point[2])
-
-    return x, y, z
-
-
-def write_world_8_points(points):
-    my_points = []
-    for i in range(8):
-        point = np.array(points[i]).flatten().tolist()
-        my_points.append(point)
-
-    return my_points
-
-
-def get_3d_location(data_label_world):
-    x = data_label_world["3d_location"]["x"]
-    y = data_label_world["3d_location"]["y"]
-    z = data_label_world["3d_location"]["z"]
-
-    return np.array([x, y, z]).reshape(3, 1)
-
-
-def get_3d_8points(obj_size, yaw_lidar, center_lidar):
-    lidar_r = np.matrix(
-        [
-            [math.cos(yaw_lidar), -math.sin(yaw_lidar), 0],
-            [math.sin(yaw_lidar), math.cos(yaw_lidar), 0],
-            [0, 0, 1],
-        ]
-    )
-    l, w, h = obj_size
-    corners_3d_lidar = np.matrix(
-        [
-            [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],
-            [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],
-            [0, 0, 0, 0, h, h, h, h],
-        ]
-    )
-    corners_3d_lidar = lidar_r * corners_3d_lidar + np.matrix(center_lidar).T
-
-    return corners_3d_lidar.T
-
-
-def get_world_8_points(data_label_world):
-    size = data_label_world["3d_dimensions"]
-    pos = data_label_world["3d_location"]
-    box = get_3d_8points(
-        [float(size["l"]), float(size["w"]), float(size["h"])],
-        float(data_label_world["rotation"]),
-        [float(pos["x"]), float(pos["y"]), float(pos["z"]) - float(size["h"]) / 2],
-    ).tolist()
-
-    points = []
-    for i in range(8):
-        point = np.array(box[i]).reshape(3, 1)
-        points.append(point)
-
-    return points
-
-
 def get_data(data_info):
     for data in data_info:
         path_pcd = data["pointcloud_path"]
@@ -121,25 +57,15 @@ def get_data(data_info):
             return data
 
 
-def get_rotation(world_8_points, my_3d_point, length, w):
-    x = my_3d_point[0]
-    a = world_8_points[0][0]
-    b = world_8_points[1][0]
-    c = world_8_points[2][0]
-    r_tan = ((b + c - 2 * x) * length) / ((a + b - 2 * x) * w)
-
-    return math.atan(r_tan)
-
-
-def transform_world_to_lidar(point, path_novatel_to_world, path_lidar_to_novatel):
+def transform_world_to_lidar(point, novatel_to_world_path, lidar_to_novatel_path):
     # world to novatel
-    rotation, translation = utils.get_rotation_translation(path_novatel_to_world)
+    rotation, translation = utils.get_rotation_translation(novatel_to_world_path)
     new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
-    rotation, translation = utils.get_rotation_translation(path_lidar_to_novatel)
+    rotation, translation = utils.get_rotation_translation(lidar_to_novatel_path)
     new_rotation = utils.inverse_matrix(rotation)
     new_translation = -np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)
@@ -155,13 +81,13 @@ def label_world_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, 
 
     for entry in label_world:
         # get 3d location
-        my_3d_point = get_3d_location(entry)
+        my_3d_point = utils.get_3d_location(entry)
 
         # transform 3d location from world to vehicle lidar coordinate
         new_3d_point = transform_world_to_lidar(my_3d_point, novatel_to_world_path, lidar_to_novatel_path)
 
         # get 8 points in world coordinate
-        world_8_points = get_world_8_points(entry)
+        world_8_points = utils.get_world_8_points(entry)
 
         my_world_8_points = []
 
@@ -171,11 +97,11 @@ def label_world_to_v(cooperative_label_path: Path, novatel_to_world_path: Path, 
             my_world_8_points.append(point)
 
         # write 8 points in vehicle lidar coordinate
-        new_world_8_points = write_world_8_points(my_world_8_points)
+        new_world_8_points = utils.write_world_8_points(my_world_8_points)
 
         l = entry["3d_dimensions"]["l"]
         w = entry["3d_dimensions"]["w"]
-        rotation = get_rotation(new_world_8_points, new_3d_point, l, w)
+        rotation = utils.get_rotation(new_world_8_points, new_3d_point, l, w)
 
         entry["3d_location"]["x"] = new_3d_point[0]
         entry["3d_location"]["y"] = new_3d_point[1]

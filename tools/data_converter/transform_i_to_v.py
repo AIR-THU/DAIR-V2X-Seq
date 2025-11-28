@@ -1,6 +1,5 @@
 import argparse
 import numpy as np
-from pypcd import pypcd
 from tqdm import tqdm
 from pathlib import Path
 import tools.utils as utils
@@ -55,13 +54,6 @@ def get_data(data_info, frame_id):
             return data
 
 
-def rev_matrix(R):
-    R = np.matrix(R)
-    rev_R = R.I
-    rev_R = np.array(rev_R)
-    return rev_R
-
-
 def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float):
     # virtual lidar to world
     rotation, translation = utils.get_rotation_translation(virtual_lidar_to_world_path)
@@ -69,26 +61,18 @@ def transform_virtual_lidar_to_lidar(input_point: np.ndarray, virtual_lidar_to_w
 
     # world to novatel
     rotation, translation = utils.get_rotation_translation(novatel_to_world_path)
-    new_rotation = rev_matrix(rotation)
+    new_rotation = utils.inverse_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation)
 
     # novatel to lidar
     rotation, translation = utils.get_rotation_translation(lidar_to_novatel_path)
-    new_rotation = rev_matrix(rotation)
+    new_rotation = utils.inverse_matrix(rotation)
     new_translation = - np.dot(new_rotation, translation)
     point = utils.transform(point, new_translation, new_rotation) + np.array([delta_x, delta_y, 0]).reshape(3, 1)
     point = point.T
     
     return point
-
-
-def write_pcd(pcd_path, new_points, path_save):
-    pc = pypcd.PointCloud.from_path(pcd_path)
-    pc.pc_data['x'] = np.array([a[0] for a in new_points])
-    pc.pc_data['y'] = np.array([a[1] for a in new_points])
-    pc.pc_data['z'] = np.array([a[2] for a in new_points])
-    pc.save_pcd(path_save, compression='binary_compressed')
 
 
 def transform_i_to_v(infrastructure_pcd_path: Path, virtual_lidar_to_world_path: Path, novatel_to_world_path: Path, lidar_to_novatel_path: Path, delta_x: float, delta_y: float, save_path: Path):
@@ -97,7 +81,7 @@ def transform_i_to_v(infrastructure_pcd_path: Path, virtual_lidar_to_world_path:
     # (n, 3)
     new_points = transform_virtual_lidar_to_lidar(points.T, virtual_lidar_to_world_path, novatel_to_world_path, lidar_to_novatel_path, delta_x, delta_y)
     # save point cloud
-    write_pcd(infrastructure_pcd_path, new_points, save_path)
+    utils.write_pcd(infrastructure_pcd_path, new_points, save_path)
 
 
 def process_dataset(base: Path, output_dir: Path):
