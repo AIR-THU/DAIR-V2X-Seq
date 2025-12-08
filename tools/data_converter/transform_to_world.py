@@ -50,19 +50,6 @@ veh lidar --------------------------> novatel
    """
 
 
-def transform_points(points: np.ndarray, rotation, translation) -> np.ndarray:
-    """Apply rotation and translation to Nx3 points. rotation: (3,3), translation: (3,) or (3,1)."""
-    pts = np.asarray(points)
-    if pts.size == 0:
-        return pts
-    # ensure shape (3, N)
-    p = pts.reshape(-1, 3).T  # (3,N)
-    R = np.array(rotation).reshape(3, 3)
-    t = np.array(translation).reshape(3, 1)
-    out = (R @ p) + t
-    return out.T
-
-
 def write_pcd_from_points(src_pcd_path: Path, points: np.ndarray, out_pcd_path: Path):
     # reuse header from source PCD if available; otherwise create minimal
     if src_pcd_path.exists():
@@ -84,95 +71,86 @@ def process_infrastructure(base: Path):
     """
     Process infrastructure-side data: transform lidar point clouds to world coordinates.
     """
-    i_output_dir = base / "infrastructure-side" / "velodyne_world"
-    utils.mkdir_p(i_output_dir)
+    input_dir=base / "infrastructure-side" / "velodyne"
+    output_dir=base / "infrastructure-side" / "velodyne_world"
 
+    # create output directory
+    utils.mkdir_p(output_dir)
+
+    # read data info
     i_data_info = utils.read_json(base / "infrastructure-side" / "data_info.json")
 
-    for i_entry in tqdm(i_data_info, desc="Processing infrastructure frames"):
-        infra_frame = i_entry["frame_id"]
+    # for each point cloud file
+    for data in tqdm(i_data_info, desc=f"Processing point clouds in {input_dir.parent.name}"):
+        # frame ID
+        frame_id = data["frame_id"]
+        # point cloud path
+        pcd_path = base / input_dir.parent.name / data["pointcloud_path"]
+        # calibration path
+        calib_path = base / "infrastructure-side" / data["calib_virtuallidar_to_world_path"]
+        # output path
+        out_pcd_path = output_dir / f"{frame_id}.pcd"
+
         try:
-            infra_pcd = base / "infrastructure-side" / "velodyne" / f"{infra_frame}.pcd"
-            virt_calib = base / "infrastructure-side" / i_entry["calib_virtuallidar_to_world_path"]
+            # get rotation and translation
+            rotation, translation = utils.get_rotation_translation(calib_path)
 
-            rotation, translation = utils.get_rotation_translation(virt_calib)
+            # virtual lidar to world
+            input_points = utils.read_pcd(pcd_path)
 
-            pts = utils.read_pcd(infra_pcd)
-            pts_world = transform_points(pts, rotation, translation)
+            # TODO: relative error
+            output_points = utils.transform(input_points.T, translation, rotation)
 
             write_pcd_from_points(
-                infra_pcd,
-                pts_world,
-                out_pcd_path=i_output_dir / f"{infra_frame}.pcd"
+                pcd_path,
+                output_points.T,
+                out_pcd_path
             )
-
         except Exception as e:
-            print(f"Skipping infra frame {infra_frame}: {e}")
+            print(f"Skipping infrastructure frame {frame_id}: {e}")
 
 
 def process_vehicle(base: Path):
     """
     Process vehicle-side data: transform lidar point clouds to world coordinates.
     """
-    v_output_dir = base / "vehicle-side" / "velodyne_world"
-    utils.mkdir_p(v_output_dir)
+    output_dir = base / "vehicle-side" / "velodyne_world"
 
+    # create output directory
+    utils.mkdir_p(output_dir)
+
+    # read data info
     v_data_info = utils.read_json(base / "vehicle-side" / "data_info.json")
 
-    for v_entry in tqdm(v_data_info, desc="Processing vehicle frames"):
-        veh_frame = v_entry["frame_id"]
+    # for each point cloud file
+    for data in tqdm(v_data_info, desc="Processing vehicle frames"):
+        # frame ID
+        frame_id = data["frame_id"]
+        # point cloud path
+        pcd_path = base / "vehicle-side" / "velodyne" / f"{frame_id}.pcd"
+        # calibration path
+        calib_lidar_to_novatel_path = base / "vehicle-side" / data["calib_lidar_to_novatel_path"]
+        calib_novatel_to_world_path = base / "vehicle-side" / data["calib_novatel_to_world_path"]
+        # output path
+        out_pcd_path = output_dir / f"{frame_id}.pcd"
+
         try:
-            veh_pcd = base / "vehicle-side" / "velodyne" / f"{veh_frame}.pcd"
-            lidar2novatel_calib = base / "vehicle-side" / v_entry["calib_lidar_to_novatel_path"]
-            novatel_calib = base / "vehicle-side" / v_entry["calib_novatel_to_world_path"]
+            rotation_lidar_to_novatel, translation_lidar_to_novatel = utils.get_rotation_translation(calib_lidar_to_novatel_path)
+            rotation_novatel_to_world, translation_novatel_to_world = utils.get_rotation_translation(calib_novatel_to_world_path)
 
-            rotation_l2n, translation_l2n = utils.get_rotation_translation(lidar2novatel_calib)
-            rotation_n2w, translation_n2w = utils.get_rotation_translation(novatel_calib)
+            input_points = utils.read_pcd(pcd_path)
 
-            pts = utils.read_pcd(veh_pcd)
-            pts_novatel = transform_points(pts, rotation_l2n, translation_l2n)
-            pts_world = transform_points(pts_novatel, rotation_n2w, translation_n2w)
-
+            novatel_points = utils.transform(input_points.T, translation_lidar_to_novatel, rotation_lidar_to_novatel)
+            world_points = utils.transform(novatel_points, translation_novatel_to_world, rotation_novatel_to_world)
+            
             write_pcd_from_points(
-                veh_pcd,
-                pts_world,
-                out_pcd_path=v_output_dir / f"{veh_frame}.pcd"
+                pcd_path,
+                world_points.T,
+                out_pcd_path
             )
 
         except Exception as e:
-            print(f"Skipping vehicle frame {veh_frame}: {e}")
-
-
-def process_labels(label_path: Path, output_path: Path, rotation, translation):
-    """
-    Reads labels, transforms their 3D locations to the world frame, and saves them.
-    """
-    if not label_path.exists():
-        # Not all frames have labels, so this is not an error.
-        return
-
-    labels = utils.read_json(label_path)
-    transformed_labels = []
-
-    for obj in labels:
-        center_point = obj.get("3d_location")
-        if center_point is None:
-            transformed_labels.append(obj)
-            continue
-
-        # Transform the object's center point to world coordinates
-        world_center = transform_points(np.array(center_point), rotation, translation)
-
-        # Create a new dictionary or update the existing one
-        new_obj = obj.copy()
-        new_obj['world_3d_location'] = world_center.flatten().tolist()
-        # Dimensions (l, w, h) and rotation are also important for a full 3D box,
-        # but for now, we are just transforming the center.
-        transformed_labels.append(new_obj)
-
-    if transformed_labels:
-        utils.mkdir_p(output_path.parent)
-        utils.write_json(transformed_labels, output_path)
+            print(f"Skipping vehicle frame {frame_id}: {e}")
 
 
 def process_dataset(base: Path):
